@@ -1,69 +1,35 @@
-let storage;
-alert('Содержимое хранилища: ' + localStorage.getItem('savedResponse')); 
+const loader = document.querySelector(".loader")
+const items = document.querySelector("#items");
+const item = document.querySelector(".item");
+const requestAddress = "https://students.netoservices.ru/nestjs-backend/slow-get-courses";
 
+function createValutList(list) {   
+    for (const code in list) {
+        const valute = list[code];
+        const newItem = document.createElement("div");
+        newItem.classList.add("item");
+        const valuteDiv = items.appendChild(newItem);
+        const itemContent = `<div class="item__code">${valute.CharCode}</div><div class="item__value">${valute.Value}</div><div class="item__currency">руб.</div>`;
+        valuteDiv.insertAdjacentHTML("afterbegin", itemContent);
+        }
+}
 
+let xhr = new XMLHttpRequest();
+xhr.addEventListener("readystatechange", (e) => {
+    if (xhr.readyState === xhr.DONE) {
+        const valutes = JSON.parse(xhr.responseText).response.Valute;
 
-const imgLoader = document.getElementById('loader');  
-const items = document.getElementById('items'); 
+        createValutList(valutes);
+        deactivateLoader();
+    }
+})
 
-async function getCurrency() {  
-  let response = await fetch('https://netology-slow-rest.herokuapp.com/');
+xhr.open("GET", requestAddress);
+xhr.responseType = "text";
+xhr.send();
 
-  if (response.ok) {  
-    let data = await response.json(); 
-   
-    imgLoader.classList.remove('loader_active');
-
-    let dataArr = ['{', '}'];
-
-    for (let key in data.response.Valute) {
-      let i = 1;
-      let value = data.response.Valute[key].Value; 
-      let charCode = data.response.Valute[key].CharCode;
-
-      items.insertAdjacentHTML('beforeend', `
-      <div class="item">
-        <div class="item__code">
-          ${charCode}
-        </div>
-        <div class="item__value">
-          ${value}
-        </div>
-        <div class="item__currency">
-          руб.
-        </div>
-      </div>`); 
-
-      dataArr.splice(i, 0, `${charCode}`, ':', `${value}`, ','); 
-      i++;
-    };
-
-       localStorage.setItem('savedResponse', JSON.stringify(dataArr.join(''))); 
-
-    return data; 
-  } else {
-    alert('error', response.status);    
-  };
-};
-
-
-
-getCurrency(); 
-
-
-
-document.addEventListener('click', () => { 
-  delete localStorage.savedResponse;
-  alert('Локальное хранилище очищено!')
-});
-
-
-document.addEventListener('keydown', (event) => { 
-
-  pressedSymbol = event.key; 
-  
-  if ((pressedSymbol === 'j') && (localStorage.savedResponse !== null)) { 
-  console.dir('ОБЪЕКТ JSON:  ' + JSON.parse(localStorage.getItem('savedResponse'))); 
-  console.log(event.key)
+function deactivateLoader() {
+    if (loader.classList.contains("loader_active")) {
+      loader.classList.remove("loader_active");
+    }
   }
-});

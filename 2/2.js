@@ -1,100 +1,33 @@
-const pollTitle = document.getElementById('poll__title'); 
-const pollAnswers = document.getElementById('poll__answers'); 
+const requestAddress = "https://students.netoservices.ru/nestjs-backend/poll";
+const activePoll = document.querySelector(".poll__answers_active");
+const titleField = document.querySelector(".poll__title");
 
-let buttonPollAnswer = pollAnswers.querySelectorAll('button'); 
-let questionID; 
 
-async function getQuestion() {  
-    let response = await fetch('https://netology-slow-rest.herokuapp.com/poll.php');
-  
-    if (response.ok) {  
-      let data = await response.json();
-   
-        console.log('ID= ' + data.id)
-        console.log(data.data.title)
-        questionID = data.id; 
+let xhr = new XMLHttpRequest();
+xhr.addEventListener("readystatechange", (e) => {
+    if (xhr.readyState === xhr.DONE) {
+        const title = JSON.parse(xhr.responseText).data.title;
+        const answers = JSON.parse(xhr.responseText).data.answers;    
+        titleField.textContent = String(title);
 
-        let titleValue = data.data.title;
+        createButton(answers);
+    }
+});
 
-        pollTitle.textContent = titleValue; 
-        
-      for (let key in data.data.answers) { 
-        
-          
-  
-            let pollAnswer = data.data.answers[key];
+xhr.open("GET", requestAddress);
+xhr.responseType = "text";
+xhr.send();
 
-            pollAnswers.insertAdjacentHTML('beforeend', `
-                <button class="poll__answer">
-                    ${pollAnswer}
-                </button>`);
-        };
-        
-        buttonPollAnswer = pollAnswers.querySelectorAll('button'); 
+function createButton (answersList) {
+    for (const key in answersList) {
+        const element = answersList[key];
+        const answerButton = document.createElement("button");
+        answerButton.classList.add("poll__answer");
+        answerButton.textContent = element;
+        activePoll.appendChild(answerButton);
 
-    } else {
-      alert('error', response.status);    
-    };
-    
-  };
-  
-  async function postAnswer(b, questionID) { 
-
-    let response = await fetch('https://netology-slow-rest.herokuapp.com/poll.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: `vote=${questionID}&answer=${b}` 
-      });
-    
-    if (response.ok) {  
-      
-        let data = await response.json(); 
-        alert('Спасибо, Ваш голос засчитан!');
-        pollAnswers.innerHTML = '';   
-
-        let summ = 0; 
-
-        for (let key in data.stat) {
-            summ = summ + Number(data.stat[key].votes); 
-        };
-
-      for (let key in data.stat) {
-        
-   
-
-        let answer = data.stat[key].answer; 
-        let votes_percent = (100 * Number(data.stat[key].votes) / summ).toFixed(2); 
-        
-        pollAnswers.insertAdjacentHTML('beforeend', `
-            <div>
-                <div class="stat__answer">
-                    ${answer}: 
-                </div>
-                <div class="stat__votes">
-                    ${votes_percent}%
-                </div>
-            </div>`); 
-            pollAnswers.classList.add('stat__answers_inline');
-      };
-
-    };
-      
-  };
-  
-  getQuestion(); 
-
-  
-    document.addEventListener('click', (event) => { 
-        elem = event.target; 
-
-        for (let b = 0; b < buttonPollAnswer.length; b++) { 
-            
-            if (elem === buttonPollAnswer[b]) {
-                console.log('pushing ID: ' +  questionID);
-                postAnswer(b, questionID); 
-            };
-        };
-      
-    });
+        answerButton.addEventListener("click", (e) => {
+            alert("Спасибо, ваш голос засчитан!");
+        });
+    }
+}

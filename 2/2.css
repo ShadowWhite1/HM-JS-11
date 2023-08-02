@@ -1,25 +1,11 @@
 body {
-    font-family: Arial;
-  }
-  
-  .card {
-    width: 625px;
-  }
-  
-  .poll__title {
-    margin-bottom: 20px;
-  }
-  
-  .stat__answers_inline {
-    display: inline-block;
-    
-  }
-  
-  .stat__answer {
-    float:left;
-  }
-  
-  .stat__votes {
-    display: inline;
-    font-weight: bolder;
-  }
+  font-family: Arial;
+}
+
+.card {
+  width: 625px;
+}
+
+.poll__title {
+  margin-bottom: 20px;
+}
